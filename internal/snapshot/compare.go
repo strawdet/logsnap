@@ -77,3 +77,16 @@ func ListCompareResults(dir string) ([]string, error) {
 	}
 	return names, nil
 }
+
+// DeleteCompareResult removes a named comparison result from disk.
+func DeleteCompareResult(dir, name string) error {
+	path := filepath.Join(dir, name+".json")
+	err := os.Remove(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("compare result %q not found", name)
+		}
+		return fmt.Errorf("delete compare result: %w", err)
+	}
+	return nil
+}
