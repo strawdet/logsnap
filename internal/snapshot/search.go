@@ -34,39 +34,48 @@ func Search(dir string, filter SearchFilter) ([]SearchResult, error) {
 			continue
 		}
 
-		if filter.Tag != "" {
-			tagged := false
-			for _, t := range snap.Tags {
-				if strings.EqualFold(t, filter.Tag) {
-					tagged = true
-					break
-				}
-			}
-			if !tagged {
-				continue
-			}
-		}
-
-		if filter.Since != nil && snap.CreatedAt.Before(*filter.Since) {
+		if !matchesFilter(snap, filter) {
 			continue
-		}
-
-		if filter.Until != nil && snap.CreatedAt.After(*filter.Until) {
-			continue
-		}
-
-		if filter.LabelKey != "" {
-			val, ok := snap.Labels[filter.LabelKey]
-			if !ok {
-				continue
-			}
-			if filter.LabelVal != "" && !strings.EqualFold(val, filter.LabelVal) {
-				continue
-			}
 		}
 
 		results = append(results, SearchResult{Snapshot: snap, FilePath: meta.FilePath})
 	}
 
 	return results, nil
+}
+
+// matchesFilter reports whether a snapshot satisfies all criteria in filter.
+func matchesFilter(snap *Snapshot, filter SearchFilter) bool {
+	if filter.Tag != "" {
+		tagged := false
+		for _, t := range snap.Tags {
+			if strings.EqualFold(t, filter.Tag) {
+				tagged = true
+				break
+			}
+		}
+		if !tagged {
+			return false
+		}
+	}
+
+	if filter.Since != nil && snap.CreatedAt.Before(*filter.Since) {
+		return false
+	}
+
+	if filter.Until != nil && snap.CreatedAt.After(*filter.Until) {
+		return false
+	}
+
+	if filter.LabelKey != "" {
+		val, ok := snap.Labels[filter.LabelKey]
+		if !ok {
+			return false
+		}
+		if filter.LabelVal != "" && !strings.EqualFold(val, filter.LabelVal) {
+			return false
+		}
+	}
+
+	return true
 }
