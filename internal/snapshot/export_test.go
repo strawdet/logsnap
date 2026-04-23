@@ -78,3 +78,29 @@ func TestExportSnapshot_UnsupportedFormat(t *testing.T) {
 		t.Fatal("expected error for unsupported format, got nil")
 	}
 }
+
+func TestExportSnapshot_EmptyEntries(t *testing.T) {
+	snap := &Snapshot{
+		ID:        "empty-snapshot",
+		CreatedAt: time.Now(),
+		Entries:   []LogEntry{},
+	}
+	dest := filepath.Join(t.TempDir(), "out.json")
+
+	if err := ExportSnapshot(snap, dest, FormatJSON); err != nil {
+		t.Fatalf("unexpected error exporting empty snapshot: %v", err)
+	}
+
+	data, err := os.ReadFile(dest)
+	if err != nil {
+		t.Fatalf("reading output file: %v", err)
+	}
+
+	var entries []LogEntry
+	if err := json.Unmarshal(data, &entries); err != nil {
+		t.Fatalf("invalid json output for empty snapshot: %v", err)
+	}
+	if len(entries) != 0 {
+		t.Errorf("expected 0 entries, got %d", len(entries))
+	}
+}
