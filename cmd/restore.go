@@ -29,9 +29,17 @@ func init() {
 func runRestore(cmd *cobra.Command, args []string) error {
 	snapshotID := args[0]
 
+	if snapshotID == "" {
+		return fmt.Errorf("snapshot-id must not be empty")
+	}
+
 	result, err := snapshot.Restore(snapshotDir, snapshotID, restoreOutput)
 	if err != nil {
 		return fmt.Errorf("restore failed: %w", err)
+	}
+
+	if result.EntryCount == 0 {
+		fmt.Fprintf(os.Stderr, "Warning: snapshot %s contained no entries\n", result.SnapshotID)
 	}
 
 	if restoreOutput != "-" {
