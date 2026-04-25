@@ -56,13 +56,7 @@ func init() {
 				fmt.Println("No pinned snapshots.")
 				return nil
 			}
-			for id, note := range index {
-				if note != "" {
-					fmt.Printf("  %s  — %s\n", id, note)
-				} else {
-					fmt.Printf("  %s\n", id)
-				}
-			}
+			printPinIndex(index)
 			return nil
 		},
 	}
@@ -71,4 +65,16 @@ func init() {
 	rootCmd.AddCommand(pinCmd)
 	rootCmd.AddCommand(unpinCmd)
 	rootCmd.AddCommand(pinsCmd)
+}
+
+// printPinIndex writes all pinned snapshot entries to stdout, showing the
+// optional note alongside the snapshot ID when one is present.
+func printPinIndex(index map[string]string) {
+	for id, note := range index {
+		if note != "" {
+			fmt.Printf("  %s  — %s\n", id, note)
+		} else {
+			fmt.Printf("  %s\n", id)
+		}
+	}
 }
