@@ -79,3 +79,15 @@ func TestRemoveNote_NotFound(t *testing.T) {
 		t.Error("expected error removing non-existent note")
 	}
 }
+
+func TestAddNote_UpdatedAtChanges(t *testing.T) {
+	dir := t.TempDir()
+	writeNoteSnapshot(t, dir, "snap5")
+	AddNote(dir, "snap5", "first")
+	n1, _ := GetNote(dir, "snap5")
+	AddNote(dir, "snap5", "second")
+	n2, _ := GetNote(dir, "snap5")
+	if n2.UpdatedAt.Before(n1.UpdatedAt) || n2.UpdatedAt.Equal(n1.UpdatedAt) {
+		t.Error("UpdatedAt should advance on subsequent AddNote calls")
+	}
+}
