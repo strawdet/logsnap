@@ -78,12 +78,18 @@ func init() {
 	RootCmd.AddCommand(workflowCmd)
 }
 
-// parseStep parses "action" or "action:key=val,key2=val2" into a WorkflowStep.
+// parseStep parses a workflow step from a raw string.
+// The expected format is "action" or "action:key=val,key2=val2".
+// The action name must not be empty. Each parameter must be in "key=value" form.
 func parseStep(raw string) (snapshot.WorkflowStep, error) {
 	parts := strings.SplitN(raw, ":", 2)
+	action := parts[0]
+	if strings.TrimSpace(action) == "" {
+		return snapshot.WorkflowStep{}, fmt.Errorf("step action name must not be empty")
+	}
 	step := snapshot.WorkflowStep{
-		Name:   parts[0],
-		Action: parts[0],
+		Name:   action,
+		Action: action,
 		Params: map[string]string{},
 	}
 	if len(parts) == 2 {
@@ -91,6 +97,9 @@ func parseStep(raw string) (snapshot.WorkflowStep, error) {
 			pair := strings.SplitN(kv, "=", 2)
 			if len(pair) != 2 {
 				return step, fmt.Errorf("invalid param %q (expected key=value)", kv)
+			}
+			if strings.TrimSpace(pair[0]) == "" {
+				return step, fmt.Errorf("invalid param %q (key must not be empty)", kv)
 			}
 			step.Params[pair[0]] = pair[1]
 		}
