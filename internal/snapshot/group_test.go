@@ -78,6 +78,20 @@ func TestRemoveFromGroup(t *testing.T) {
 	}
 }
 
+func TestRemoveFromGroup_SnapshotNotInGroup(t *testing.T) {
+	dir := t.TempDir()
+	writeGroupSnapshot(t, dir, "snap-001")
+	writeGroupSnapshot(t, dir, "snap-002")
+
+	_ = AddToGroup(dir, "grp", "snap-001")
+
+	// Removing a snapshot that was never added should return an error.
+	err := RemoveFromGroup(dir, "grp", "snap-002")
+	if err == nil {
+		t.Error("expected error when removing snapshot not in group")
+	}
+}
+
 func TestListGroups(t *testing.T) {
 	dir := t.TempDir()
 	writeGroupSnapshot(t, dir, "snap-001")
