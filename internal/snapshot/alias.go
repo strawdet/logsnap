@@ -80,3 +80,18 @@ func RemoveAlias(dir, alias string) error {
 func ListAliases(dir string) (AliasIndex, error) {
 	return LoadAliasIndex(dir)
 }
+
+// AliasesForSnapshot returns all aliases that point to the given snapshotID.
+func AliasesForSnapshot(dir, snapshotID string) ([]string, error) {
+	idx, err := LoadAliasIndex(dir)
+	if err != nil {
+		return nil, err
+	}
+	var aliases []string
+	for alias, id := range idx {
+		if id == snapshotID {
+			aliases = append(aliases, alias)
+		}
+	}
+	return aliases, nil
+}
